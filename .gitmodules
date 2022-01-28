@@ -1,0 +1,3 @@
+[submodule "lib/mayGL"]
+	path = lib/mayGL
+	url = https://github.com/EthanHofton/mayGL.git
