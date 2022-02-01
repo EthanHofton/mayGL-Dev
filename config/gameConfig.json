@@ -1,0 +1,11 @@
+{
+    "width" : 1200,
+    "height" : 650,
+    "fps" : 100,
+    "z_near_ortho" : -3000,
+    "z_far_ortho" : 3000,
+    "z_near_perspective" : 0.1,
+    "z_far_perspective" : 300,
+    "max_num_vertices" : 900000,
+    "max_num_indices" : 10000000
+}

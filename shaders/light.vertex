@@ -1,0 +1,48 @@
+#version 400
+
+uniform mat4 u_Proj;
+uniform mat4 u_View;
+
+layout(location = 0) in vec3 i_pos;
+layout(location = 1) in vec3 i_normals;
+layout(location = 2) in vec2 i_texCoords;
+layout(location = 3) in vec3 i_Ka;
+layout(location = 4) in vec3 i_Kd;
+layout(location = 5) in vec3 i_Ks;
+layout(location = 6) in float i_Ns;
+layout(location = 7) in float i_mapKd;
+layout(location = 8) in float i_mapKs;
+
+out vec3 o_normal;
+out vec3 o_fragPos;
+out vec2 o_texCoords;
+
+out MATOUT 
+{
+    vec3 Ka;
+    vec3 Kd;
+    vec3 Ks;
+    float Ns;
+    float mapKd;
+    float mapKs;
+} matOut;
+
+void main()
+{
+    gl_Position = u_Proj * u_View * vec4(i_pos, 1.0);
+    
+    gl_PointSize = 2.0;
+    o_normal = i_normals;
+    o_fragPos = vec3(i_pos);
+    o_texCoords = i_texCoords;
+
+    matOut.Ka = i_Ka;
+    matOut.Kd = i_Kd;
+    matOut.Ks = i_Ks;
+    matOut.Ns = i_Ns;
+    matOut.mapKd = i_mapKd;
+    matOut.mapKs = i_mapKs;
+}
+
+
+
