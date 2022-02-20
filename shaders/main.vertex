@@ -10,11 +10,9 @@ layout(std140) uniform Matrices
 
 layout(location = 0) in vec3 i_Pos;
 layout(location = 1) in vec2 i_texCoords;
-layout(location = 2) in float i_texId;
 
 out VSOUT {
     vec2 i_texCoords;
-    float i_texId;
 } vsout;
 
 void main() 
@@ -22,5 +20,4 @@ void main()
     gl_Position = u_Proj * u_View * vec4(i_Pos, 1.0);
 
     vsout.i_texCoords = i_texCoords;
-    vsout.i_texId = i_texId;
 }

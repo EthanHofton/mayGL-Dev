@@ -19,6 +19,7 @@
 #include <mayGL/physics/cubeCollider.hpp>
 #include <mayGL/geometry/model.hpp>
 #include <mayGL/component/materialComponent.hpp>
+#include <mayGL/component/renderComponent.hpp>
 
 using namespace mayGL;
 
@@ -26,7 +27,6 @@ struct testVertex
 {
     glm::vec3 m_pos;
     glm::vec2 m_texCoords;
-    float m_texId;
 };
 
 class TestingPage : public core::Page
@@ -46,7 +46,7 @@ private:
     
     renderer::PerspectiveProjection *m_perspective;
     renderer::Camera3D *m_cam3D;
-    renderer::RenderBatch *m_renderBatch;
+    // renderer::RenderBatch *m_renderBatch;
     physics::PhysicsWorld *m_physicsWorld;
     random::prng m_rand;
 
@@ -67,6 +67,9 @@ private:
     //       textures can be referenced by there uniform id in the shaders.
     //       add textureID filed to vertex attrib, when mesh gets pushed to
     //       renderer, convert the mesh uid to the texture unit.
+
+    // TODO: add meshRenderer component.
+    //       Mesh render class stores the meshs to be drawn, and a shader to draw them with
 };
 
 #endif

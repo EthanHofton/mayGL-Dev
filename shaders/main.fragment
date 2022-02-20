@@ -2,19 +2,12 @@
 
 out vec4 fragColor;
 
-uniform sampler2D u_Textures[16];
-
-layout(std140) uniform TextureMaps
-{
-    vec4 m_textureMaps[32];
-};
-
 in VSOUT {
     vec2 i_texCoords;
-    float i_texId;
 } vsin;
 
 void main() 
 {
-    fragColor = texture(u_Textures[int(m_textureMaps[int(vsin.i_texId)].x)], vsin.i_texCoords);
+    // fragColor = texture(u_Textures[1], vsin.i_texCoords);
+    fragColor = vec4(1, 0, 0, 1);
 }

@@ -13,7 +13,7 @@ BIN = bin
 SRC = $(wildcard src/*.cpp)
 OBJ = $(SRC:.cpp=.o)
 
-.PHONY: all clean
+.PHONY: all clean mayGLClean
 
 all: dirs libs $(PROGRAM)
 
@@ -34,3 +34,6 @@ $(PROGRAM): $(OBJ)
 
 clean:
 	rm -rf $(BIN) $(OBJ)
+
+mayGLClean:
+	cd lib/mayGL/ && make clean
