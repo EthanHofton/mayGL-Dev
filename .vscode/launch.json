@@ -11,7 +11,8 @@
             "program": "${workspaceFolder}/bin/out",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/",
+            "logging": { "engineLogging": true },
             "environment": [],
             "externalConsole": false,
             "MIMode": "lldb"

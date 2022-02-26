@@ -2,7 +2,7 @@
 
 void TestingPage::onDraw()
 {
-    ImGui::ShowMetricsWindow();
+    // ImGui::ShowMetricsWindow();
     imguiShowSceneHierarchy();
 
     component::RenderComponent::preDraw();
@@ -55,11 +55,18 @@ void TestingPage::onCreate()
     e->entityId("test");
 
     e->addComponent(new component::Transform(e, "trans"));
-    // e->addComponent(new component::Texture(e, "tex", glm::vec2(32, 32)));
+    e->addComponent(new component::Transform(e, "trans2"));
+    e->addComponent(new component::Texture(e, "tex", glm::vec2(32, 32), "one"));
+    e->addComponent(new component::Texture(e, "tex2", "res/stone.png", "two"));
 
     vertex::VertexLayout *vlayout = new vertex::VertexLayout();
     vlayout->push(new vertex::VertexComponent("pos", vertex::position, 3, GL_FLOAT, GL_FALSE, offsetof(testVertex, m_pos)));
     vlayout->push(new vertex::VertexComponent("texCoords", vertex::texture_coords, 2, GL_FLOAT, GL_FALSE, offsetof(testVertex, m_texCoords)));
+
+    vertex::VertexLayout *vlayout2 = new vertex::VertexLayout();
+    vlayout2->push(new vertex::VertexComponent("pos", vertex::position, 3, GL_FLOAT, GL_FALSE, offsetof(testVertex, m_pos)));
+    vlayout2->push(new vertex::VertexComponent("texCoords", vertex::texture_coords, 2, GL_FLOAT, GL_FALSE, offsetof(testVertex, m_texCoords)));
+
 
     texChoice = 1.0f;
 
@@ -78,31 +85,36 @@ void TestingPage::onCreate()
     e->addComponent(new component::Mesh(e, "mesh", vlayout));
     e->getComponent<component::Mesh>("mesh")->setVertices((void*)&vertices[0], sizeof(testVertex) * vertices.size());
     e->getComponent<component::Mesh>("mesh")->setIndices((void*)&indices[0], sizeof(unsigned int) * indices.size());
-    e->getComponent<component::Transform>("trans")->addAllMeshes();
+    e->getComponent<component::Transform>("trans")->addMesh("mesh");
+
+    e->addComponent(new component::Mesh(e, "mesh2", vlayout2));
+    e->getComponent<component::Mesh>("mesh2")->setVertices((void*)&vertices[0], sizeof(testVertex) * vertices.size());
+    e->getComponent<component::Mesh>("mesh2")->setIndices((void*)&indices[0], sizeof(unsigned int) * indices.size());
+    e->getComponent<component::Transform>("trans2")->addMesh("mesh2");
 
     e->addComponent(new component::RenderComponent(e, "renderComponent", vlayout));
     e->getComponent<component::RenderComponent>("renderComponent")->loadShaders("main.vertex", "main.fragment");
     e->getComponent<component::RenderComponent>("renderComponent")->setPrimativeType(GL_TRIANGLES);
     e->getComponent<component::RenderComponent>("renderComponent")->addAllMeshes();
-    // e->getComponent<component::RenderComponent>("renderComponent")->enableWireframe();
-    // e->getComponent<component::Mesh>("mesh")->addAllTextures();
+    e->getComponent<component::Mesh>("mesh")->addAllTextures();
+    e->getComponent<component::Mesh>("mesh2")->addAllTextures();
 
-    // float data[32][32][4];
-    // for (int i = 0; i < 32; i++)
-    // {
-    //     for (int j = 0; j < 32; j++)
-    //     {
-    //         data[i][j][0] = 1;
-    //         data[i][j][1] = i / 32.0f;
-    //         data[i][j][2] = j / 32.0f;
-    //         data[i][j][3] = 1;
-    //     }
-    // }
+    float data[32][32][4];
+    for (int i = 0; i < 32; i++)
+    {
+        for (int j = 0; j < 32; j++)
+        {
+            data[i][j][0] = i / 32.0f;
+            data[i][j][1] = j / 32.0f;
+            data[i][j][2] = 0;
+            data[i][j][3] = 1;
+        }
+    }
 
-    // unsigned int texId = e->getComponent<component::Texture>("tex")->getTextureId();
-    // glBindTexture(GL_TEXTURE_2D, texId);
-    // glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 32, 32, GL_RGBA, GL_FLOAT, (void*)&data[0]);
-    // glGenerateMipmap(GL_TEXTURE_2D);
+    unsigned int texId = e->getComponent<component::Texture>("tex")->getTextureId();
+    glBindTexture(GL_TEXTURE_2D, texId);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 32, 32, GL_RGBA, GL_FLOAT, (void*)&data[0]);
+    glGenerateMipmap(GL_TEXTURE_2D);
 
     pushEntity(m_cam3D);
     pushEntity(e);

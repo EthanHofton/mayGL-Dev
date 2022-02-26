@@ -6,8 +6,10 @@ in VSOUT {
     vec2 i_texCoords;
 } vsin;
 
+uniform sampler2D one;
+
 void main() 
 {
-    // fragColor = texture(u_Textures[1], vsin.i_texCoords);
-    fragColor = vec4(1, 0, 0, 1);
+    fragColor = texture(one, vsin.i_texCoords);
+    //fragColor = vec4(1, 0, 0, 1);
 }
