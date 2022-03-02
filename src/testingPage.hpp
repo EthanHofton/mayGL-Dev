@@ -20,6 +20,7 @@
 #include <mayGL/geometry/model.hpp>
 #include <mayGL/component/materialComponent.hpp>
 #include <mayGL/component/renderComponent.hpp>
+#include <mayGL/core/config.hpp>
 
 using namespace mayGL;
 
@@ -46,30 +47,17 @@ private:
     
     renderer::PerspectiveProjection *m_perspective;
     renderer::Camera3D *m_cam3D;
-    // renderer::RenderBatch *m_renderBatch;
     physics::PhysicsWorld *m_physicsWorld;
     random::prng m_rand;
 
     entity::Entity *e;
-    float texChoice;
-    // entity::Entity *r;
-    // entity::Entity *dragon;
-    // Ball *m_ball;
-    // Ball *m_ball2;
 
-    // Ball *m_ball2;
-    // Floor *m_floor;
-
-    // TODO: bind material to mesh (instead of mesh to material)
-    // TODO: mesh load in bindeed materials as array (allows multiple materials)
-
-    // TODO: add std::string m_uniformID to texture class.
-    //       textures can be referenced by there uniform id in the shaders.
-    //       add textureID filed to vertex attrib, when mesh gets pushed to
-    //       renderer, convert the mesh uid to the texture unit.
-
-    // TODO: add meshRenderer component.
-    //       Mesh render class stores the meshs to be drawn, and a shader to draw them with
+    glm::vec2 zoom;
+    float zoomFactor;
+    glm::vec2 trans;
+    int numIter;
+    int cutoff;
+    glm::vec3 color;
 };
 
 #endif

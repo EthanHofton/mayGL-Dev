@@ -5,16 +5,24 @@ void TestingPage::onDraw()
     // ImGui::ShowMetricsWindow();
     imguiShowSceneHierarchy();
 
+    ImGui::Begin("madlebrot peramiter");
+
+    ImGui::DragFloat("zoom factor##zoom", &zoomFactor, 0.01f);
+    ImGui::DragInt("number of iterations##iter", &numIter, 10);
+    ImGui::DragInt("cutoff##iter", &cutoff, 1);
+    ImGui::DragFloat2("x, y##transform", &trans[0], 0.1f);
+    ImGui::ColorEdit3("color", &color[0]);
+
+    ImGui::End();
+
     component::RenderComponent::preDraw();
     
+    e->getComponent<component::RenderComponent>("renderComponent")->getShader()->setUniform2f("zoom", zoom);
+    e->getComponent<component::RenderComponent>("renderComponent")->getShader()->setUniform2f("trans", trans);
+    e->getComponent<component::RenderComponent>("renderComponent")->getShader()->setUniform1i("numIter", numIter);
+    e->getComponent<component::RenderComponent>("renderComponent")->getShader()->setUniform1i("cutoff", cutoff);
+    e->getComponent<component::RenderComponent>("renderComponent")->getShader()->setUniform3f("color", color);
     e->getComponent<component::RenderComponent>("renderComponent")->draw();
-
-    // test error checking
-    // GLenum err;
-    // while((err = glGetError()) != GL_NO_ERROR)
-    // {
-    //     CORE_ERROR("OPENGL ERROR: {}", err);
-    // }
 }
 
 void TestingPage::onUpdate()
@@ -23,9 +31,26 @@ void TestingPage::onUpdate()
     {
         core::Graphics::instance()->wireframe(!core::Graphics::instance()->wireframe());
     }
-    
+
     bool inputDisabled = core::InputManager::instance()->disableInput();
     core::InputManager::instance()->disableInput(false);
+
+    if (core::InputManager::instance()->mouseButtonPressed(core::InputManager::left)) 
+    {
+        glm::vec2 mousePos = core::InputManager::instance()->getMousePos();
+
+        float width = config::Config::instance()->getWidth();
+        float height = config::Config::instance()->getHeight();
+
+        float x = math::map(mousePos.x, 0, width, zoom.x, zoom.y);
+        float y = math::map(mousePos.y, 0, height, zoom.x, zoom.y);
+
+        trans += glm::vec2(x, y);
+
+        zoom *= zoomFactor;
+    }
+    
+    
     if (core::InputManager::instance()->keyPressed(SDL_SCANCODE_ESCAPE))
     {
         core::Graphics::instance()->relativeMouse(!core::Graphics::instance()->relativeMouse());
@@ -33,12 +58,17 @@ void TestingPage::onUpdate()
     } else {
         core::InputManager::instance()->disableInput(inputDisabled);
     }
-
 }
 
 void TestingPage::onCreate()
 {
+    zoom = glm::vec2(-2, 2);
+    zoomFactor = 14.0 / 16.0f;
+    trans = glm::vec2(0);
     m_rand = random::prng("seed");
+    numIter = 100;
+    cutoff = 16;
+    color = glm::vec3(1,0,0);
     
     m_perspective = new renderer::PerspectiveProjection;
     m_cam3D = new renderer::Camera3D();
@@ -55,26 +85,16 @@ void TestingPage::onCreate()
     e->entityId("test");
 
     e->addComponent(new component::Transform(e, "trans"));
-    e->addComponent(new component::Transform(e, "trans2"));
-    e->addComponent(new component::Texture(e, "tex", glm::vec2(32, 32), "one"));
-    e->addComponent(new component::Texture(e, "tex2", "res/stone.png", "two"));
 
     vertex::VertexLayout *vlayout = new vertex::VertexLayout();
     vlayout->push(new vertex::VertexComponent("pos", vertex::position, 3, GL_FLOAT, GL_FALSE, offsetof(testVertex, m_pos)));
     vlayout->push(new vertex::VertexComponent("texCoords", vertex::texture_coords, 2, GL_FLOAT, GL_FALSE, offsetof(testVertex, m_texCoords)));
 
-    vertex::VertexLayout *vlayout2 = new vertex::VertexLayout();
-    vlayout2->push(new vertex::VertexComponent("pos", vertex::position, 3, GL_FLOAT, GL_FALSE, offsetof(testVertex, m_pos)));
-    vlayout2->push(new vertex::VertexComponent("texCoords", vertex::texture_coords, 2, GL_FLOAT, GL_FALSE, offsetof(testVertex, m_texCoords)));
-
-
-    texChoice = 1.0f;
-
     std::vector<testVertex> vertices = {
-        { {-1.0f/2.0f,-1.0f/2.0f, 0.0f}, {0,1} },
-        { { 1.0f/2.0f,-1.0f/2.0f, 0.0f}, {1,1} },
-        { { 1.0f/2.0f, 1.0f/2.0f, 0.0f}, {1,0} },
-        { {-1.0f/2.0f, 1.0f/2.0f, 0.0f}, {0,0} },
+        { {-1.0f,-1.0f, 0.0f}, {0,1} },
+        { { 1.0f,-1.0f, 0.0f}, {1,1} },
+        { { 1.0f, 1.0f, 0.0f}, {1,0} },
+        { {-1.0f, 1.0f, 0.0f}, {0,0} },
     };
 
     std::vector<unsigned int> indices = {
@@ -87,34 +107,15 @@ void TestingPage::onCreate()
     e->getComponent<component::Mesh>("mesh")->setIndices((void*)&indices[0], sizeof(unsigned int) * indices.size());
     e->getComponent<component::Transform>("trans")->addMesh("mesh");
 
-    e->addComponent(new component::Mesh(e, "mesh2", vlayout2));
-    e->getComponent<component::Mesh>("mesh2")->setVertices((void*)&vertices[0], sizeof(testVertex) * vertices.size());
-    e->getComponent<component::Mesh>("mesh2")->setIndices((void*)&indices[0], sizeof(unsigned int) * indices.size());
-    e->getComponent<component::Transform>("trans2")->addMesh("mesh2");
-
     e->addComponent(new component::RenderComponent(e, "renderComponent", vlayout));
     e->getComponent<component::RenderComponent>("renderComponent")->loadShaders("main.vertex", "main.fragment");
     e->getComponent<component::RenderComponent>("renderComponent")->setPrimativeType(GL_TRIANGLES);
     e->getComponent<component::RenderComponent>("renderComponent")->addAllMeshes();
-    e->getComponent<component::Mesh>("mesh")->addAllTextures();
-    e->getComponent<component::Mesh>("mesh2")->addAllTextures();
-
-    float data[32][32][4];
-    for (int i = 0; i < 32; i++)
-    {
-        for (int j = 0; j < 32; j++)
-        {
-            data[i][j][0] = i / 32.0f;
-            data[i][j][1] = j / 32.0f;
-            data[i][j][2] = 0;
-            data[i][j][3] = 1;
-        }
-    }
-
-    unsigned int texId = e->getComponent<component::Texture>("tex")->getTextureId();
-    glBindTexture(GL_TEXTURE_2D, texId);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 32, 32, GL_RGBA, GL_FLOAT, (void*)&data[0]);
-    glGenerateMipmap(GL_TEXTURE_2D);
+    e->getComponent<component::RenderComponent>("renderComponent")->getShader()->addUniform("zoom");
+    e->getComponent<component::RenderComponent>("renderComponent")->getShader()->addUniform("trans");
+    e->getComponent<component::RenderComponent>("renderComponent")->getShader()->addUniform("numIter");
+    e->getComponent<component::RenderComponent>("renderComponent")->getShader()->addUniform("cutoff");
+    e->getComponent<component::RenderComponent>("renderComponent")->getShader()->addUniform("color");
 
     pushEntity(m_cam3D);
     pushEntity(e);

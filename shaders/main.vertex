@@ -17,7 +17,8 @@ out VSOUT {
 
 void main() 
 {
-    gl_Position = u_Proj * u_View * vec4(i_Pos, 1.0);
+    //gl_Position = u_Proj * u_View * vec4(i_Pos, 1.0);
+    gl_Position = vec4(i_Pos, 1.0);
 
     vsout.i_texCoords = i_texCoords;
 }
